@@ -1,18 +1,29 @@
 package dev.jokr.localnet.discovery.models;
 
-import java.io.Serializable;
-
 /**
  * Created by JoKr on 8/27/2016.
  */
-public class DiscoveryReply implements Serializable {
+public class Peer {
 
+    private int id;
     private String ip;
     private int port;
+    private String name;
 
-    public DiscoveryReply(String ip, int port) {
+    public Peer(int id, String ip, int port) {
+        this.id = id;
         this.ip = ip;
         this.port = port;
+    }
+
+
+
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getIp() {

@@ -33,6 +33,10 @@ public class JoinThread implements Runnable {
                 socket.send(sendPacket);
                 Log.d("USER", "Packet sent to 255.255.255.255:" + (basePort-i));
             }
+            byte[] buffer = new byte[15000];
+            DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+            socket.receive(receivePacket);
+            Log.d("USER", "Received packet from: " + receivePacket.getAddress().getHostAddress());
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {

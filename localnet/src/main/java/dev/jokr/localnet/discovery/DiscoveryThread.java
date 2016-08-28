@@ -6,18 +6,24 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
+import dev.jokr.localnet.discovery.models.DiscoveryReply;
+import dev.jokr.localnet.discovery.models.Peer;
 import dev.jokr.localnet.utils.NetworkUtil;
+import dev.jokr.localnet.utils.SerializationUtil;
 
 /**
  * Created by JoKr on 8/27/2016.
  */
 public class DiscoveryThread implements Runnable {
 
-    DatagramSocket socket;
-    // These are my favorite numbers. I need them hardcoded because you can't broadcast over all ports
+    private DatagramSocket socket;
+    private DiscoveryReply reply;
+
+
+    public DiscoveryThread(DiscoveryReply reply) {
+        this.reply = reply;
+    }
 
     @Override
     public void run() {
@@ -31,14 +37,23 @@ public class DiscoveryThread implements Runnable {
             socket.setBroadcast(true);
 
             while (true) {
-                Log.d("USER", "Ready to receive packet");
+                // Receive broadcast packet
                 byte[] buffer = new byte[15000];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);socket.receive(packet);
-                Log.d("USER", "Received packet from: " + packet.getAddress().getHostAddress());
+                DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+                socket.receive(receivePacket);
+                Log.d("USER", "Received packet from: " + receivePacket.getAddress().getHostAddress());
+
+                // Send reply
+                byte[] replyPacket = SerializationUtil.serialize(reply);
+                socket.send(new DatagramPacket(replyPacket, replyPacket.length, receivePacket.getAddress(), receivePacket.getPort()));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    public interface PeerConnectedCallback {
+        public void onPeerConnected(Peer peer);
     }
 }
