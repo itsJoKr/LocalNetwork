@@ -15,13 +15,13 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import dev.jokr.localnet.LocalServer;
+import dev.jokr.localnet._LocalServer;
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
 
-public class ServerSocketService extends Service implements ServerHandler.InitCallback {
-    private ServerHandler serverHandler;
+public class _ServerSocketService extends Service implements _ServerHandler.InitCallback {
+    private _ServerHandler serverHandler;
 
-    public ServerSocketService() {
+    public _ServerSocketService() {
     }
 
     public static void actionSendMessage(final Context context) {
@@ -37,7 +37,7 @@ public class ServerSocketService extends Service implements ServerHandler.InitCa
         Log.d("USER", "onCreate called");
 
         Looper serviceLooper = thread.getLooper();
-        serverHandler = new ServerHandler(serviceLooper, this);
+        serverHandler = new _ServerHandler(serviceLooper, this);
     }
 
     /*
@@ -69,7 +69,7 @@ public class ServerSocketService extends Service implements ServerHandler.InitCa
     @Override
     public void onInitializedSocket(int port) {
         // Send broadcast intent to client
-        Intent i = new Intent(LocalServer.ACTION_INIT);
+        Intent i = new Intent(_LocalServer.ACTION_INIT);
         i.putExtra(DiscoveryReply.class.getName(), new DiscoveryReply(getLocalIp(), port));
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(i);

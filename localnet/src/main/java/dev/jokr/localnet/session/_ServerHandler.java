@@ -11,11 +11,11 @@ import java.net.ServerSocket;
 /**
  * Created by JoKr on 8/27/2016.
  */
-class ServerHandler extends Handler {
+class _ServerHandler extends Handler {
 
     InitCallback callback;
 
-    public ServerHandler(Looper looper, InitCallback callback) {
+    public _ServerHandler(Looper looper, InitCallback callback) {
         super(looper);
         this.callback = callback;
     }

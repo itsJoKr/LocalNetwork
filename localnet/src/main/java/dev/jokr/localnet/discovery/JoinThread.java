@@ -7,16 +7,24 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import dev.jokr.localnet.discovery.models.DiscoveryReply;
 import dev.jokr.localnet.utils.NetworkUtil;
+import dev.jokr.localnet.utils.SerializationUtil;
 
 /**
  * Created by JoKr on 8/27/2016.
  */
 public class JoinThread implements Runnable {
 
-    DatagramSocket socket;
+    private DatagramSocket socket;
+    private ServerDiscoveryCallback callback;
+
+    public JoinThread(ServerDiscoveryCallback callback) {
+        this.callback = callback;
+    }
 
     @Override
     public void run() {
@@ -35,8 +43,16 @@ public class JoinThread implements Runnable {
             }
             byte[] buffer = new byte[15000];
             DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
+            socket.setSoTimeout(10000);
             socket.receive(receivePacket);
             Log.d("USER", "Received packet from: " + receivePacket.getAddress().getHostAddress());
+
+            byte[] bytes = receivePacket.getData();
+            DiscoveryReply reply = (DiscoveryReply) SerializationUtil.deserialize(bytes);
+            Log.d("USER", "Reply: " + reply.getIp() + ":" + reply.getPort());
+            callback.serverDiscovered(reply);
+        } catch (SocketTimeoutException e) {
+            callback.serverDiscoveryTimeout();
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -44,5 +60,10 @@ public class JoinThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public interface ServerDiscoveryCallback {
+        public void serverDiscovered(DiscoveryReply reply);
+        public void serverDiscoveryTimeout();
     }
 }

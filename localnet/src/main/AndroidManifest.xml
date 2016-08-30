@@ -11,9 +11,17 @@
         android:label="@string/app_name"
         android:supportsRtl="true">
         <service
-            android:name=".session.ServerSocketService"
+            android:name=".session._ServerSocketService"
             android:enabled="true"
             android:exported="true"></service>
+        <service
+            android:name=".ServerService"
+            android:enabled="true"
+            android:exported="false"></service>
+        <service
+            android:name=".ClientService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>
