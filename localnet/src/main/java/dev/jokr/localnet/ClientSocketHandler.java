@@ -24,21 +24,26 @@ public class ClientSocketHandler implements Runnable {
 
     @Override
     public void run() {
+       ServerSocket serverSocket = null;
         try {
-            final ServerSocket serverSocket = new ServerSocket(0);
-            Log.d("USER", "Listening on " + serverSocket.getLocalPort());
-            notifySocketInitialized(serverSocket.getLocalPort());
-            Socket socket = serverSocket.accept();
-            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-            SessionMessage<?> sessionMessage = (SessionMessage<?>) objectInputStream.readObject();
-            Log.d("USER", "Session message!");
-
-
-
+            serverSocket = new ServerSocket(0);
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        }
+        Log.d("USER", "Listening on " + serverSocket.getLocalPort());
+        notifySocketInitialized(serverSocket.getLocalPort());
+
+        while(true) {
+            try {
+                Socket socket = serverSocket.accept();
+                ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+                SessionMessage sessionMessage = (SessionMessage) objectInputStream.readObject();
+                passSessionMessage(sessionMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -51,7 +56,17 @@ public class ClientSocketHandler implements Runnable {
         });
     }
 
+    private void passSessionMessage(final SessionMessage message) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                callback.onSessionMessage(message);
+            }
+        });
+    }
+
     public interface ServiceCallback {
         public void onInitializedSocket(int port);
+        public void onSessionMessage(SessionMessage message);
     }
 }

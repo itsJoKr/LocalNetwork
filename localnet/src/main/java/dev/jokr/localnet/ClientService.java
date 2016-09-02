@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.Formatter;
 import android.util.Log;
 
@@ -14,7 +15,9 @@ import java.io.Serializable;
 import dev.jokr.localnet.discovery.JoinThread;
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
 import dev.jokr.localnet.models.IncomingServerMessage;
+import dev.jokr.localnet.models.Payload;
 import dev.jokr.localnet.models.RegisterMessage;
+import dev.jokr.localnet.models.SessionMessage;
 import dev.jokr.localnet.utils.MessageType;
 
 /**
@@ -28,28 +31,15 @@ public class ClientService  extends Service implements ClientSocketHandler.Servi
     private SendHandler sendHandler;
 
     private DiscoveryReply reply;
+    private LocalBroadcastManager manager;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        // Create server socket (listening) thread
-//        HandlerThread thread = new HandlerThread("client", Process.THREAD_PRIORITY_BACKGROUND);
-//        thread.start();
-//        Looper serviceLooper = thread.getLooper();
-//        clientSocketHandler = new ClientSocketHandler(serviceLooper);
 
-//        Thread t = new Thread(new JoinThread(this));
-//        t.start();
-
-
+        this.manager = LocalBroadcastManager.getInstance(this);
         Thread t = new Thread(new ClientSocketHandler(this));
         t.start();
-
-        // Create socket (one-time send)
-//        HandlerThread thread1 = new HandlerThread("sendThread", Process.THREAD_PRIORITY_BACKGROUND);
-//        thread.start();
-//        Looper looper = thread.getLooper();
-//        sendHandler = new SendHandler(looper);
     }
 
     @Nullable
@@ -72,6 +62,7 @@ public class ClientService  extends Service implements ClientSocketHandler.Servi
         if (reply != null) {
             this.reply = reply;
         }
+
         // Todo: sending messages
 //        Thread t = new Thread(new SendHandler(bundle));
 //        t.start();
@@ -81,9 +72,16 @@ public class ClientService  extends Service implements ClientSocketHandler.Servi
 
     @Override
     public void onInitializedSocket(int port) {
-        RegisterMessage<Integer> message = new RegisterMessage<>(42, getLocalIp(), port);
+        RegisterMessage message = new RegisterMessage(new Payload<Integer>(42), getLocalIp(), port);
         Thread t = new Thread(new SendHandler(new IncomingServerMessage(MessageType.REGISTER, message), reply.getIp(), reply.getPort()));
         t.start();
+    }
+
+    @Override
+    public void onSessionMessage(SessionMessage message) {
+        Intent i = new Intent(LocalClient.SESSION_MESSAGE);
+        i.putExtra(SessionMessage.class.getName(), message);
+        manager.sendBroadcast(i);
     }
 
     @Override

@@ -1,36 +1,50 @@
 package dev.jokr.localnet;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.support.annotation.Nullable;
+import android.support.v7.app.NotificationCompat;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
+import dev.jokr.localnet.models.ConnectedClients;
+import dev.jokr.localnet.models.IncomingServerMessage;
+import dev.jokr.localnet.models.Payload;
 import dev.jokr.localnet.models.RegisterMessage;
+import dev.jokr.localnet.models.SessionMessage;
+import dev.jokr.localnet.utils.MessageType;
 import dev.jokr.localnet.utils.NetworkUtil;
 
 /**
  * Created by JoKr on 8/28/2016.
  */
-public class ServerService extends Service implements ServerSocketHandler.ServiceCallback {
+public class ServerService extends Service implements ServerSocketHandler.ServiceCallback, Communicator {
+
+    public static final String ACTION = "action";
+    public static final int NOTIFICATION_ID = 521;
+
+    public static final String ACTION_BUNDLE = "action_bundle";
+    public static final String CLASS = "class";
+    public static final String BUNDLE = "bundle";
+    public static final String PAYLOAD = "payload";
+    // Possible service actions:
+    public static final int START_SESSION = 1;
+    public static final int SESSION_EVENT = 2;
+    public static final int STOP = 3;
 
     private ServerSocketHandler serverSocketHandler;
     private DiscoverySocketHandler discoverySocketHandler;
 
 //    private List<RegisterMessage<?>> registerClients;
-    private HashMap<Long, RegisterMessage<?>> registeredClients;
+    private HashMap<Long, RegisterMessage> registeredClients;
+    private LocalSession session;
 
     @Override
     public void onCreate() {
@@ -38,6 +52,9 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
         registeredClients = new HashMap<>();
         Thread t = new Thread(new ServerSocketHandler(this));
         t.start();
+
+
+//        startForeground();
     }
 
     /*
@@ -47,16 +64,42 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("USER", "onStartCommand called");
+        int action = intent.getIntExtra(ACTION, 0);
 
-//        Message msg = serverSocketHandler.obtainMessage();
-//        Bundle bundle = new Bundle();
-//        bundle.putString("key", message);
-//        msg.setData(bundle);
-//        serverSocketHandler.handleMessage(msg);
+        if (action != 0) {
+            if (action == START_SESSION)
+                startSession((Class) intent.getSerializableExtra(CLASS), intent.getBundleExtra(BUNDLE));
+            else if (action == SESSION_EVENT)
+                session.onEvent((Payload<?>) intent.getSerializableExtra(PAYLOAD));
+        }
 
         return START_STICKY;
     }
 
+    private void startSession(Class c, Bundle b) {
+        try {
+            Object o = c.newInstance();
+            if (!LocalSession.class.isInstance(o)) {
+                throw new IllegalArgumentException("Class " + c.getName() + " is not instance of LocalSession");
+            }
+            session = (LocalSession) o;
+            session.preCreateInit(this);
+            session.onCreate(b, new ConnectedClients(registeredClients));
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private void runServiceInForeground() {
+        Notification notification = new NotificationCompat.Builder(this)
+                .setContentTitle("Local Net Session")
+                .setSmallIcon(R.drawable.ic_play_circle_filled_black_24dp)
+                .build();
+        startForeground(NOTIFICATION_ID, notification);
+    }
 
     @Nullable
     @Override
@@ -67,25 +110,51 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     @Override
     public void onInitializedSocket(int port) {
         // Create discovery socket handler
-        Log.d("USER", "onInitializedSocket, starting Handler...");
-//        HandlerThread thread = new HandlerThread("discoveryHandler", Process.THREAD_PRIORITY_FOREGROUND);
-//        thread.start();
-//        Looper serviceLooper = thread.getLooper();
-//        discoverySocketHandler = new DiscoverySocketHandler(serviceLooper, new DiscoveryReply(getLocalIp(), port));
+        Log.d("USER", "onInitializedSocket, starting Discovery...");
         Thread t = new Thread(new DiscoverySocketHandler(new DiscoveryReply(getLocalIp(), port)));
         t.start();
     }
 
     @Override
-    public void onClientConnected(RegisterMessage<?> message) {
-        // Send message to object using local broadcast manager
+    public void onClientConnected(RegisterMessage message) {
+        // Todo: notify UI with Broadcast
         Log.d("USER", "onClientConnected: " + message.getPayload());
         Long id = NetworkUtil.getIdFromIpAddress(message.getIp());
         registeredClients.put(id, message);
     }
 
+    @Override
+    public void onSessionMessage(SessionMessage message, String senderIp) {
+        if (session != null) {
+            session.onReceiveMessage(NetworkUtil.getIdFromIpAddress(senderIp), message.getPayload());
+        }
+    }
+
+
     private String getLocalIp() {
         WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
         return Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+    }
+
+    @Override
+    public void sendMessage(long recipientId, Payload payload) {
+        SessionMessage message = new SessionMessage(payload);
+        RegisterMessage client = null;
+        if (registeredClients.containsKey(recipientId)) {
+            client =  registeredClients.get(recipientId);
+        } else {
+            throw new IllegalArgumentException("Recipient id " + recipientId + " is not in registered clients list");
+        }
+        Thread t = new Thread(new SendHandler(message, client.getIp(), client.getPort()));
+        t.start();
+    }
+
+    @Override
+    public void sendBroadcastMessage(Payload<?> payload) {
+        SessionMessage message = new SessionMessage(payload);
+        for (RegisterMessage client : registeredClients.values()){
+            Thread t = new Thread(new SendHandler(message, client.getIp(), client.getPort()));
+            t.start();
+        }
     }
 }

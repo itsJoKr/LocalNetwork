@@ -5,13 +5,13 @@ import java.io.Serializable;
 /**
  * Created by JoKr on 8/28/2016.
  */
-public class RegisterMessage<T> implements Serializable {
+public class RegisterMessage implements Serializable {
 
-    private T payload;
+    private Payload<?> payload;
     private String ip;
     private int port;
 
-    public RegisterMessage(T payload, String ip, int port) {
+    public RegisterMessage(Payload<?> payload, String ip, int port) {
         this.payload = payload;
         this.ip = ip;
         this.port = port;
@@ -25,7 +25,7 @@ public class RegisterMessage<T> implements Serializable {
         return port;
     }
 
-    public T getPayload() {
+    public Payload<?> getPayload() {
         return payload;
     }
 }

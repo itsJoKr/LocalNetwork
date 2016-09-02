@@ -4,15 +4,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import dev.jokr.localnet.LocalClient;
 import dev.jokr.localnet.LocalServer;
-import dev.jokr.localnet._LocalServer;
+import dev.jokr.localnet.models.Payload;
 
 public class MainActivity extends AppCompatActivity {
 
     Button btnJoin;
     Button btnCreate;
+    private LocalServer localServer;
+
+    private boolean isServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,23 +29,37 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void createSession(View view) {
-        //btnCreate.setEnabled(false);
+        btnCreate.setEnabled(false);
         btnJoin.setEnabled(false);
+        isServer = true;
 
-//        Intent i = new Intent(this, _ServerSocketService.class);
-//        i.putExtra("key", "yolo");
-//        Log.d("USER", "starting service");
-//        startService(i);
-
-//        _LocalServer localServer = new _LocalServer(this);
-        LocalServer localServer = new LocalServer(this);
+        localServer = new LocalServer(this);
         localServer.init();
     }
 
     public void joinSession(View view) {
         btnCreate.setEnabled(false);
+        isServer = false;
 
         LocalClient localClient = new LocalClient(this);
         localClient.connect();
+        localClient.setReceiver(new LocalClient.MessageReceiver() {
+            @Override
+            public void onMessageReceived(Payload<?> payload) {
+                Toast.makeText(MainActivity.this, "" + ((Integer)payload.getPayload()), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void startSession(View view) {
+        btnCreate.setEnabled(false);
+        btnJoin.setEnabled(false);
+
+        localServer.setSession(GameSession.class);
+    }
+
+
+    public void sendSampleMessage(View view) {
+        localServer.localSessionEvent(new Payload<Integer>(255));
     }
 }

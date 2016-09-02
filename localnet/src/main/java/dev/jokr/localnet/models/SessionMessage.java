@@ -5,14 +5,14 @@ import java.io.Serializable;
 /**
  * Created by JoKr on 8/29/2016.
  */
-public class SessionMessage<T> implements Serializable {
-    private T payload;
+public class SessionMessage implements Serializable {
+    private Payload<?> payload;
 
-    public SessionMessage(T payload) {
+    public SessionMessage(Payload<?> payload) {
         this.payload = payload;
     }
 
-    public T getPayload() {
+    public Payload<?> getPayload() {
         return payload;
     }
 }
