@@ -60,6 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void sendSampleMessage(View view) {
-        localServer.localSessionEvent(new Payload<Integer>(255));
+        localServer.sendLocalSessionEvent(new Payload<Integer>(255));
     }
 }

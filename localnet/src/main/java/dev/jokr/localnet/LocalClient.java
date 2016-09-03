@@ -20,7 +20,8 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
     public static final String SESSION_MESSAGE = "session_message";
 
     private Context context;
-    private MessageReceiver receiver;
+    private MessageReceiver messageReceiver;
+    private DiscoveryStatusReceiver discoveryReceiver;
 
     public LocalClient(Context context) {
         this.context = context;
@@ -28,13 +29,17 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
     }
 
     public LocalClient(Context context, MessageReceiver receiver) {
-        this.receiver = receiver;
+        this.messageReceiver = receiver;
         this.context = context;
         registerMessageBroadcastReceiver();
     }
 
     public void setReceiver(MessageReceiver receiver) {
-        this.receiver = receiver;
+        this.messageReceiver = receiver;
+    }
+
+    public void setDiscoveryReceiver(DiscoveryStatusReceiver discoveryReceiver) {
+        this.discoveryReceiver = discoveryReceiver;
     }
 
     public void connect() {
@@ -42,8 +47,14 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
         new Thread(thread).start();
     }
 
+    public void sendSessionMessage(Payload<?> payload) {
+        Intent i = new Intent(context, ClientService.class);
+    }
+
     @Override
     public void serverDiscovered(DiscoveryReply reply) {
+        if (discoveryReceiver != null)
+            discoveryReceiver.onServerDiscovered();
         Intent i = new Intent(context, ClientService.class);
         i.putExtra(ClientService.DISCOVERY_REPLY, reply);
         context.startService(i);
@@ -51,7 +62,8 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
 
     @Override
     public void serverDiscoveryTimeout() {
-
+        if (discoveryReceiver != null)
+            discoveryReceiver.onDiscoveryTimeout();
     }
 
     private void registerMessageBroadcastReceiver() {
@@ -66,12 +78,16 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
         @Override
         public void onReceive(Context context, Intent intent) {
             SessionMessage message = (SessionMessage) intent.getExtras().getSerializable(SessionMessage.class.getName());
-            if (receiver != null)
-                receiver.onMessageReceived(message.getPayload());
+            if (messageReceiver != null)
+                messageReceiver.onMessageReceived(message.getPayload());
         }
     }
 
     public interface MessageReceiver {
         public void onMessageReceived(Payload<?> payload);
+    }
+    public interface DiscoveryStatusReceiver {
+        public void onDiscoveryTimeout();
+        public void onServerDiscovered();
     }
 }

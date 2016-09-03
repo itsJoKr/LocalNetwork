@@ -32,6 +32,10 @@ public abstract class LocalSession {
         communicator.sendBroadcastMessage(payload);
     }
 
+    public void sendUiEvent(Payload<?> payload) {
+        communicator.sendUiEvent(payload);
+    }
+
     public void preCreateInit(Communicator communicator) {
         this.communicator = communicator;
     }

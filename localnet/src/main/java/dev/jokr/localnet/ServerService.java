@@ -7,6 +7,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -30,10 +31,11 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     public static final String ACTION = "action";
     public static final int NOTIFICATION_ID = 521;
 
-    public static final String ACTION_BUNDLE = "action_bundle";
+    // Keys for extras
     public static final String CLASS = "class";
     public static final String BUNDLE = "bundle";
     public static final String PAYLOAD = "payload";
+
     // Possible service actions:
     public static final int START_SESSION = 1;
     public static final int SESSION_EVENT = 2;
@@ -42,17 +44,19 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     private ServerSocketHandler serverSocketHandler;
     private DiscoverySocketHandler discoverySocketHandler;
 
-//    private List<RegisterMessage<?>> registerClients;
     private HashMap<Long, RegisterMessage> registeredClients;
     private LocalSession session;
+    private LocalBroadcastManager manager;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        this.manager = LocalBroadcastManager.getInstance(this);
         registeredClients = new HashMap<>();
+
         Thread t = new Thread(new ServerSocketHandler(this));
         t.start();
-
 
 //        startForeground();
     }
@@ -64,16 +68,24 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d("USER", "onStartCommand called");
-        int action = intent.getIntExtra(ACTION, 0);
 
-        if (action != 0) {
-            if (action == START_SESSION)
-                startSession((Class) intent.getSerializableExtra(CLASS), intent.getBundleExtra(BUNDLE));
-            else if (action == SESSION_EVENT)
-                session.onEvent((Payload<?>) intent.getSerializableExtra(PAYLOAD));
-        }
+        int action = intent.getIntExtra(ACTION, 0);
+        processAction(action, intent);
+
 
         return START_STICKY;
+    }
+
+    private void processAction(int action, Intent intent) {
+        if (action == 0)
+            return;
+
+        if (action == START_SESSION)
+            startSession((Class) intent.getSerializableExtra(CLASS), intent.getBundleExtra(BUNDLE));
+        else if (action == SESSION_EVENT)
+            session.onEvent((Payload<?>) intent.getSerializableExtra(PAYLOAD));
+        else if (action == STOP)
+            this.stopSelf();
     }
 
     private void startSession(Class c, Bundle b) {
@@ -109,8 +121,6 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
 
     @Override
     public void onInitializedSocket(int port) {
-        // Create discovery socket handler
-        Log.d("USER", "onInitializedSocket, starting Discovery...");
         Thread t = new Thread(new DiscoverySocketHandler(new DiscoveryReply(getLocalIp(), port)));
         t.start();
     }
@@ -141,7 +151,7 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
         SessionMessage message = new SessionMessage(payload);
         RegisterMessage client = null;
         if (registeredClients.containsKey(recipientId)) {
-            client =  registeredClients.get(recipientId);
+            client = registeredClients.get(recipientId);
         } else {
             throw new IllegalArgumentException("Recipient id " + recipientId + " is not in registered clients list");
         }
@@ -152,9 +162,17 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     @Override
     public void sendBroadcastMessage(Payload<?> payload) {
         SessionMessage message = new SessionMessage(payload);
-        for (RegisterMessage client : registeredClients.values()){
+        for (RegisterMessage client : registeredClients.values()) {
             Thread t = new Thread(new SendHandler(message, client.getIp(), client.getPort()));
             t.start();
         }
+    }
+
+    @Override
+    public void sendUiEvent(Payload<?> payload) {
+        Intent i = new Intent(LocalServer.UI_EVENT);
+        SessionMessage sessionMessage = new SessionMessage(payload);
+        i.putExtra(SessionMessage.class.getName(), sessionMessage);
+        manager.sendBroadcast(i);
     }
 }

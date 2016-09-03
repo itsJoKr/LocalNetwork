@@ -10,4 +10,5 @@ public interface Communicator {
 
     public void sendMessage(long recipientId, Payload<?> payload);
     public void sendBroadcastMessage(Payload<?> payload);
+    public void sendUiEvent(Payload<?> payload);
 }

@@ -12,7 +12,6 @@ import android.util.Log;
 
 import java.io.Serializable;
 
-import dev.jokr.localnet.discovery.JoinThread;
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
 import dev.jokr.localnet.models.IncomingServerMessage;
 import dev.jokr.localnet.models.Payload;
@@ -23,9 +22,17 @@ import dev.jokr.localnet.utils.MessageType;
 /**
  * Created by JoKr on 8/29/2016.
  */
-public class ClientService  extends Service implements ClientSocketHandler.ServiceCallback, JoinThread.ServerDiscoveryCallback {
-//    public static final String REQUEST_BUNDLE = "request_bundle";
+public class ClientService extends Service implements ClientSocketHandler.ServiceCallback {
+
+    public static final String ACTION = "action";
     public static final String DISCOVERY_REPLY = "reply";
+
+    // Keys for extras
+    public static final String PAYLOAD = "payload";
+
+    // Possible service actions:
+    public static final int SESSION_MESSAGE = 2;
+    public static final int STOP = 3;
 
     private ClientSocketHandler clientSocketHandler;
     private SendHandler sendHandler;
@@ -50,24 +57,26 @@ public class ClientService  extends Service implements ClientSocketHandler.Servi
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-//        DiscoveryRequest<?> discoveryRequest = (DiscoveryRequest<?>) intent.getSerializableExtra(SendHandler.MESSAGE);
-//        String address = intent.getStringExtra(SendHandler.ADDRESS);
-//        int port = intent.getIntExtra(SendHandler.PORT, 0);
-//        Message message = sendHandler.obtainMessage();
-//        Bundle bundle = intent.getBundleExtra(REQUEST_BUNDLE);
-//        message.setData(bundle);
-//        sendHandler.handleMessage(message);
 
         DiscoveryReply reply = (DiscoveryReply) intent.getSerializableExtra(DISCOVERY_REPLY);
         if (reply != null) {
             this.reply = reply;
         }
 
-        // Todo: sending messages
-//        Thread t = new Thread(new SendHandler(bundle));
-//        t.start();
+        int action = intent.getIntExtra(ACTION, 0);
+        processAction(action, intent);
 
         return START_STICKY;
+    }
+
+    private void processAction(int action, Intent intent) {
+        if (action == 0)
+            return;
+
+        if (action == SESSION_MESSAGE)
+            sendSessionMessage((Payload<?>) intent.getSerializableExtra(PAYLOAD));
+        else if (action == STOP)
+            this.stopSelf();
     }
 
     @Override
@@ -84,16 +93,10 @@ public class ClientService  extends Service implements ClientSocketHandler.Servi
         manager.sendBroadcast(i);
     }
 
-    @Override
-    public void serverDiscovered(DiscoveryReply reply) {
-        Log.d("USER", "SERVER DISCOVERED!");
-        Thread t = new Thread(new ClientSocketHandler(this));
+    private void sendSessionMessage(Payload<?> payload){
+        SessionMessage message = new SessionMessage(payload);
+        Thread t = new Thread(new SendHandler(new IncomingServerMessage(MessageType.SESSION, message), reply.getIp(), reply.getPort()));
         t.start();
-    }
-
-    @Override
-    public void serverDiscoveryTimeout() {
-        Log.d("USER", "server timeout!");
     }
 
     private String getLocalIp() {
