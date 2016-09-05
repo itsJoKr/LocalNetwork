@@ -16,7 +16,9 @@ public abstract class LocalSession {
     /*
      *  Class that represent session of messaging between devices.
      *  All session events (like sending or receiving a message) and logic connected to them
-     *  should be implemented here, not in Activity class or other.
+     *  should be implemented here, not in Activity class or others.
+     *
+     *  Code here will be executed in service.
      *
      */
 

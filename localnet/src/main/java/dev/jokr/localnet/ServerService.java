@@ -97,10 +97,19 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
             session = (LocalSession) o;
             session.preCreateInit(this);
             session.onCreate(b, new ConnectedClients(registeredClients));
+            sendSessionStartMessage();
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void sendSessionStartMessage() {
+        SessionMessage message = new SessionMessage(null, SessionMessage.START);
+        for (RegisterMessage client : registeredClients.values()) {
+            Thread t = new Thread(new SendHandler(message, client.getIp(), client.getPort()));
+            t.start();
         }
     }
 
@@ -127,10 +136,13 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
 
     @Override
     public void onClientConnected(RegisterMessage message) {
-        // Todo: notify UI with Broadcast
         Log.d("USER", "onClientConnected: " + message.getPayload());
         Long id = NetworkUtil.getIdFromIpAddress(message.getIp());
         registeredClients.put(id, message);
+
+        Intent i = new Intent(LocalServer.CONNECTED_CLIENT);
+        i.putExtra(RegisterMessage.class.getName(), message);
+        manager.sendBroadcast(i);
     }
 
     @Override

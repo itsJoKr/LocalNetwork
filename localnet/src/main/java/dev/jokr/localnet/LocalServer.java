@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import dev.jokr.localnet.models.Payload;
+import dev.jokr.localnet.models.RegisterMessage;
 import dev.jokr.localnet.models.SessionMessage;
 
 /**
@@ -16,7 +16,8 @@ import dev.jokr.localnet.models.SessionMessage;
  */
 public class LocalServer {
 
-    public static final String UI_EVENT = "uievent";
+    public static final String UI_EVENT = "ui_event";
+    public static final String CONNECTED_CLIENT = "conn_client";
 
     private Context context;
     private OnUiEventReceiver receiver;
@@ -65,23 +66,39 @@ public class LocalServer {
     }
 
     private void registerMessageBroadcastReceiver() {
-        BroadcastReceiver receiver = new EventBroadcastReceiver();
+        BroadcastReceiver messageReceiver = new EventBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(UI_EVENT);
-        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, intentFilter);
+        LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, intentFilter);
+
+        BroadcastReceiver connectedClientReceiver = new ConnectedClientBroadcastReceiver();
+        IntentFilter intentFilter2 = new IntentFilter();
+        intentFilter2.addAction(CONNECTED_CLIENT);
+        LocalBroadcastManager.getInstance(context).registerReceiver(connectedClientReceiver, intentFilter2);
     }
 
     private class EventBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             SessionMessage message = (SessionMessage) intent.getExtras().getSerializable(SessionMessage.class.getName());
-           if (receiver != null) {
-               receiver.onUiEvent(message.getPayload());
-           }
+            if (receiver != null) {
+                receiver.onUiEvent(message.getPayload());
+            }
+        }
+    }
+
+    private class ConnectedClientBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            RegisterMessage message = (RegisterMessage) intent.getExtras().getSerializable(RegisterMessage.class.getName());
+            if (receiver != null) {
+                receiver.onClientConnected(message.getPayload());
+            }
         }
     }
 
     public interface OnUiEventReceiver {
         public void onUiEvent(Payload<?> payload);
+        public void onClientConnected(Payload<?> payload);
     }
 }

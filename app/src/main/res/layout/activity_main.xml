@@ -10,29 +10,34 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="dev.jokr.localnetworkapp.MainActivity">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_create"
-        android:text="CREATE"
-        android:onClick="createSession"/>
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/btn_create"-->
+        <!--android:text="CREATE"-->
+        <!--android:onClick="createSession"/>-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_join"
-        android:text="JOIN"
-        android:onClick="joinSession"/>
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/btn_join"-->
+        <!--android:text="JOIN"-->
+        <!--android:onClick="joinSession"/>-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="START"
-        android:onClick="startSession"/>
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="START"-->
+        <!--android:onClick="startSession"/>-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="sendSampleMessage"
-        android:text="SEND SAMPLE MESSAGE"/>
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:onClick="sendSampleMessage"-->
+        <!--android:text="SEND SAMPLE MESSAGE"/>-->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_main"/>
 </LinearLayout>

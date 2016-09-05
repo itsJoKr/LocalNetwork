@@ -1,5 +1,7 @@
 package dev.jokr.localnet.discovery;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.IOException;
@@ -50,9 +52,9 @@ public class JoinThread implements Runnable {
             byte[] bytes = receivePacket.getData();
             DiscoveryReply reply = (DiscoveryReply) SerializationUtil.deserialize(bytes);
             Log.d("USER", "Reply: " + reply.getIp() + ":" + reply.getPort());
-            callback.serverDiscovered(reply);
+            discoveryReply(reply);
         } catch (SocketTimeoutException e) {
-            callback.serverDiscoveryTimeout();
+            discoveryTimeout();
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -60,6 +62,25 @@ public class JoinThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private void discoveryReply(final DiscoveryReply reply) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                callback.serverDiscovered(reply);
+            }
+        });
+    }
+
+    private void discoveryTimeout() {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                callback.serverDiscoveryTimeout();
+            }
+        });
     }
 
     public interface ServerDiscoveryCallback {

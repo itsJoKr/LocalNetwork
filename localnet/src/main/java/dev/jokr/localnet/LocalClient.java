@@ -49,6 +49,9 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
 
     public void sendSessionMessage(Payload<?> payload) {
         Intent i = new Intent(context, ClientService.class);
+        i.putExtra(ClientService.ACTION, ClientService.SESSION_MESSAGE);
+        i.putExtra(ClientService.PAYLOAD, payload);
+        context.startService(i);
     }
 
     @Override
@@ -74,12 +77,14 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
     }
 
     private class MessageBroadcastReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             SessionMessage message = (SessionMessage) intent.getExtras().getSerializable(SessionMessage.class.getName());
-            if (messageReceiver != null)
-                messageReceiver.onMessageReceived(message.getPayload());
+            if (message.getSignal() == SessionMessage.NONE) {
+                if (messageReceiver != null) messageReceiver.onMessageReceived(message.getPayload());
+            } else if (message.getSignal() == SessionMessage.START) {
+                if (discoveryReceiver != null) discoveryReceiver.onSessionStart();
+            }
         }
     }
 
@@ -89,5 +94,6 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
     public interface DiscoveryStatusReceiver {
         public void onDiscoveryTimeout();
         public void onServerDiscovered();
+        public void onSessionStart();
     }
 }

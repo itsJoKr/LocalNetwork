@@ -32,18 +32,20 @@ public class ServerSocketHandler implements Runnable {
             Log.d("USER", "starting ServerSocket...");
             final ServerSocket serverSocket = new ServerSocket(0);
             notifySocketInitialized(serverSocket.getLocalPort());
-            Socket socket = serverSocket.accept();
-            Log.d("USER", "ServerSocket :: got incomingMessage");
-            ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
 
-            IncomingServerMessage message = (IncomingServerMessage) input.readObject();
-            if (message.getType().equals(MessageType.REGISTER)) {
-                notifyClientConnected((RegisterMessage) message.getMessage());
-            } else if (message.getType().equals(MessageType.SESSION)) {
-                InetSocketAddress adr = (InetSocketAddress) socket.getRemoteSocketAddress();
-                notifySessionMessage((SessionMessage) message.getMessage(), adr.getHostName());
-            } else {
-                throw new IllegalArgumentException("Unknown message type: " + message.getType());
+            while (true) {
+                Socket socket = serverSocket.accept();
+                Log.d("USER", "ServerSocket :: got incomingMessage");
+                ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                IncomingServerMessage message = (IncomingServerMessage) input.readObject();
+                if (message.getType().equals(MessageType.REGISTER)) {
+                    notifyClientConnected((RegisterMessage) message.getMessage());
+                } else if (message.getType().equals(MessageType.SESSION)) {
+                    InetSocketAddress adr = (InetSocketAddress) socket.getRemoteSocketAddress();
+                    notifySessionMessage((SessionMessage) message.getMessage(), adr.getAddress().getHostAddress());
+                } else {
+                    throw new IllegalArgumentException("Unknown message type: " + message.getType());
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

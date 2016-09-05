@@ -23,6 +23,7 @@ public class GameSession extends LocalSession{
     @Override
     public void onReceiveMessage(long recipientId, Payload payload) {
         Log.d("USER", "SESSION: onReceiveMessage" + payload.getPayload());
+        sendUiEvent(payload);
     }
 
     @Override
