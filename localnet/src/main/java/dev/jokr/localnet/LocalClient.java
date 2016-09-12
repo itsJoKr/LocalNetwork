@@ -5,9 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
-import dev.jokr.localnet.discovery.JoinThread;
+import dev.jokr.localnet.discovery.ClientJoinHandler;
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
 import dev.jokr.localnet.models.Payload;
 import dev.jokr.localnet.models.SessionMessage;
@@ -15,13 +14,17 @@ import dev.jokr.localnet.models.SessionMessage;
 /**
  * Created by JoKr on 8/28/2016.
  */
-public class LocalClient implements JoinThread.ServerDiscoveryCallback {
+public class LocalClient implements ClientJoinHandler.ServerDiscoveryCallback {
+    /*
+     *  Class for local client.
+     */
 
     public static final String SESSION_MESSAGE = "session_message";
 
     private Context context;
     private MessageReceiver messageReceiver;
     private DiscoveryStatusReceiver discoveryReceiver;
+
 
     public LocalClient(Context context) {
         this.context = context;
@@ -34,24 +37,38 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
         registerMessageBroadcastReceiver();
     }
 
-    public void setReceiver(MessageReceiver receiver) {
-        this.messageReceiver = receiver;
-    }
 
-    public void setDiscoveryReceiver(DiscoveryStatusReceiver discoveryReceiver) {
-        this.discoveryReceiver = discoveryReceiver;
-    }
-
+    /*
+     * Attempt to discover server. If successful, onServerDiscovered will be called, otherwise
+     * onDiscoveryTimeout will be called. You can call this method multiple times, if first attempt fails.
+     */
     public void connect() {
-        JoinThread thread = new JoinThread(this);
+        ClientJoinHandler thread = new ClientJoinHandler(this);
         new Thread(thread).start();
     }
 
+    /*
+     * When session starts you can send messages using this method.
+     */
     public void sendSessionMessage(Payload<?> payload) {
         Intent i = new Intent(context, ClientService.class);
         i.putExtra(ClientService.ACTION, ClientService.SESSION_MESSAGE);
         i.putExtra(ClientService.PAYLOAD, payload);
         context.startService(i);
+    }
+
+    /*
+     * Set interface implementation for receiving session messages from server
+     */
+    public void setReceiver(MessageReceiver receiver) {
+        this.messageReceiver = receiver;
+    }
+
+    /*
+     * Set interface implementation for receiving discovery phase events
+     */
+    public void setDiscoveryReceiver(DiscoveryStatusReceiver discoveryReceiver) {
+        this.discoveryReceiver = discoveryReceiver;
     }
 
     @Override
@@ -88,9 +105,16 @@ public class LocalClient implements JoinThread.ServerDiscoveryCallback {
         }
     }
 
+    /*
+     * Interface for receiving session messages from server
+     */
     public interface MessageReceiver {
         public void onMessageReceived(Payload<?> payload);
     }
+
+    /*
+     * Interface for receiving event from discovery phase.
+     */
     public interface DiscoveryStatusReceiver {
         public void onDiscoveryTimeout();
         public void onServerDiscovered();

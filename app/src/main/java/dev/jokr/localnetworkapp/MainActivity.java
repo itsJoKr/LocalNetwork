@@ -60,40 +60,4 @@ public class MainActivity extends AppCompatActivity implements DiscoveryFragment
                 .replace(R.id.layout_main, SessionFragment.newInstance(SessionFragment.CLIENT))
                 .commit();
     }
-
-
-//    public void createSession(View view) {
-//        btnCreate.setEnabled(false);
-//        btnJoin.setEnabled(false);
-//        isServer = true;
-//
-//        localServer = new LocalServer(this);
-//        localServer.init();
-//    }
-//
-//    public void joinSession(View view) {
-//        btnCreate.setEnabled(false);
-//        isServer = false;
-//
-//        LocalClient localClient = new LocalClient(this);
-//        localClient.connect();
-//        localClient.setReceiver(new LocalClient.MessageReceiver() {
-//            @Override
-//            public void onMessageReceived(Payload<?> payload) {
-//                Toast.makeText(MainActivity.this, "" + ((Integer)payload.getPayload()), Toast.LENGTH_SHORT).show();
-//            }
-//        });
-//    }
-//
-//    public void startSession(View view) {
-//        btnCreate.setEnabled(false);
-//        btnJoin.setEnabled(false);
-//
-//        localServer.setSession(GameSession.class);
-//    }
-//
-//
-//    public void sendSampleMessage(View view) {
-//        localServer.sendLocalSessionEvent(new Payload<Integer>(255));
-//    }
 }

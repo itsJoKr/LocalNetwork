@@ -10,7 +10,7 @@ import dev.jokr.localnet.models.IncomingServerMessage;
 /**
  * Created by JoKr on 8/29/2016.
  */
-public class SendHandler implements Runnable {
+class SendHandler implements Runnable {
 
     public static final String MESSAGE = "msg";
     public static final String ADDRESS = "addr";

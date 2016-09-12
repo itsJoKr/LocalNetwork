@@ -72,7 +72,7 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
         return view;
     }
 
-
+    // Method for starting the server
     public void createSession() {
         btnCreate.setEnabled(false);
         btnJoin.setEnabled(false);
@@ -84,6 +84,7 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
         localServer.init();
     }
 
+    // Method for starting the client
     public void joinSession() {
         btnCreate.setEnabled(false);
         isServer = false;
@@ -93,7 +94,8 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
         localClient.setDiscoveryReceiver(new LocalClient.DiscoveryStatusReceiver() {
             @Override
             public void onDiscoveryTimeout() {
-                Toast.makeText(getContext(), "Discovery timeout", Toast.LENGTH_LONG).show();
+                if (getContext() != null)
+                    Toast.makeText(getContext(), "Discovery timeout", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -117,6 +119,7 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
         });
     }
 
+    // Server should start session, after discovery is over.
     public void startSession() {
         btnCreate.setEnabled(false);
         btnJoin.setEnabled(false);
@@ -131,7 +134,6 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
     @Override
     public void onUiEvent(Payload<?> payload) {
         // UiEvent shouldn't happen during discovery because Session is not yet created
-        //Toast.makeText(getContext(), "" + payload, Toast.LENGTH_LONG).show();
     }
 
     @Override

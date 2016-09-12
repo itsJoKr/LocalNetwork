@@ -16,17 +16,15 @@ import java.util.HashMap;
 
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
 import dev.jokr.localnet.models.ConnectedClients;
-import dev.jokr.localnet.models.IncomingServerMessage;
 import dev.jokr.localnet.models.Payload;
 import dev.jokr.localnet.models.RegisterMessage;
 import dev.jokr.localnet.models.SessionMessage;
-import dev.jokr.localnet.utils.MessageType;
 import dev.jokr.localnet.utils.NetworkUtil;
 
 /**
  * Created by JoKr on 8/28/2016.
  */
-public class ServerService extends Service implements ServerSocketHandler.ServiceCallback, Communicator {
+public class ServerService extends Service implements ServerSocketThread.ServiceCallback, Communicator {
 
     public static final String ACTION = "action";
     public static final int NOTIFICATION_ID = 521;
@@ -41,8 +39,8 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
     public static final int SESSION_EVENT = 2;
     public static final int STOP = 3;
 
-    private ServerSocketHandler serverSocketHandler;
-    private DiscoverySocketHandler discoverySocketHandler;
+    private ServerSocketThread serverSocketThread;
+    private DiscoverySocketThread discoverySocketThread;
 
     private HashMap<Long, RegisterMessage> registeredClients;
     private LocalSession session;
@@ -55,7 +53,7 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
         this.manager = LocalBroadcastManager.getInstance(this);
         registeredClients = new HashMap<>();
 
-        Thread t = new Thread(new ServerSocketHandler(this));
+        Thread t = new Thread(new ServerSocketThread(this));
         t.start();
 
 //        startForeground();
@@ -130,7 +128,7 @@ public class ServerService extends Service implements ServerSocketHandler.Servic
 
     @Override
     public void onInitializedSocket(int port) {
-        Thread t = new Thread(new DiscoverySocketHandler(new DiscoveryReply(getLocalIp(), port)));
+        Thread t = new Thread(new DiscoverySocketThread(new DiscoveryReply(getLocalIp(), port)));
         t.start();
     }
 

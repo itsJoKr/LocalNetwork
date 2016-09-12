@@ -14,11 +14,11 @@ import dev.jokr.localnet.models.SessionMessage;
 /**
  * Created by JoKr on 8/29/2016.
  */
-public class ClientSocketHandler implements Runnable {
+class ClientSocketThread implements Runnable {
 
     private  ServiceCallback callback;
 
-    public ClientSocketHandler(ServiceCallback callback) {
+    public ClientSocketThread(ServiceCallback callback) {
         this.callback = callback;
     }
 

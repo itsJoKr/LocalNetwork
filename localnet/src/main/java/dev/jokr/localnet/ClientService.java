@@ -3,14 +3,10 @@ package dev.jokr.localnet;
 import android.app.Service;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.Formatter;
-import android.util.Log;
-
-import java.io.Serializable;
 
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
 import dev.jokr.localnet.models.IncomingServerMessage;
@@ -22,7 +18,7 @@ import dev.jokr.localnet.utils.MessageType;
 /**
  * Created by JoKr on 8/29/2016.
  */
-public class ClientService extends Service implements ClientSocketHandler.ServiceCallback {
+public class ClientService extends Service implements ClientSocketThread.ServiceCallback {
 
     public static final String ACTION = "action";
     public static final String DISCOVERY_REPLY = "reply";
@@ -34,7 +30,7 @@ public class ClientService extends Service implements ClientSocketHandler.Servic
     public static final int SESSION_MESSAGE = 2;
     public static final int STOP = 3;
 
-    private ClientSocketHandler clientSocketHandler;
+    private ClientSocketThread clientSocketThread;
     private SendHandler sendHandler;
 
     private DiscoveryReply reply;
@@ -45,7 +41,7 @@ public class ClientService extends Service implements ClientSocketHandler.Servic
         super.onCreate();
 
         this.manager = LocalBroadcastManager.getInstance(this);
-        Thread t = new Thread(new ClientSocketHandler(this));
+        Thread t = new Thread(new ClientSocketThread(this));
         t.start();
     }
 

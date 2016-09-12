@@ -11,13 +11,18 @@ import dev.jokr.localnet.models.SessionMessage;
 /**
  * Created by JoKr on 8/31/2016.
  */
-public class GameSession extends LocalSession{
+public class GameSession extends LocalSession {
+
+    /*
+     *  You extend LocalSession and put all your logic here. Check LocalSession class
+     *  in library for more info.
+     */
 
     @Override
     public void onCreate(Bundle bundle, ConnectedClients connectedClients){
         Log.d("USER", "SESSION: onCreate");
         long id = (long) connectedClients.getAllClientsIds().toArray()[0];
-        sendMessage(id, new Payload<Integer>(155));
+//        sendMessage(id, new Payload<MyMessage>(new ));
     }
 
     @Override

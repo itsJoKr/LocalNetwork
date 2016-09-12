@@ -15,6 +15,7 @@ import android.widget.Toast;
 import dev.jokr.localnet.LocalClient;
 import dev.jokr.localnet.LocalServer;
 import dev.jokr.localnet.models.Payload;
+import dev.jokr.localnetworkapp.MyMessage;
 import dev.jokr.localnetworkapp.R;
 
 /**
@@ -101,9 +102,9 @@ public class SessionFragment extends Fragment {
 
     private void sendMessage() {
         if (role == SERVER)
-            server.sendLocalSessionEvent(new Payload<Integer>(2550));
+            server.sendLocalSessionEvent(new Payload<MyMessage>(new MyMessage("This is something from server!")));
         else if (role == CLIENT)
-            client.sendSessionMessage(new Payload<Integer>(201));
+            client.sendSessionMessage(new Payload<MyMessage>(new MyMessage("This is something from client!")));
     }
 
 

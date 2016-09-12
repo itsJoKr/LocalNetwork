@@ -19,10 +19,10 @@ import dev.jokr.localnet.utils.MessageType;
 /**
  * Created by JoKr on 8/28/2016.
  */
-public class ServerSocketHandler implements Runnable {
+class ServerSocketThread implements Runnable {
     private ServiceCallback callback;
 
-    public ServerSocketHandler(ServiceCallback callback) {
+    public ServerSocketThread(ServiceCallback callback) {
         this.callback = callback;
     }
 

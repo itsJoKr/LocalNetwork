@@ -17,12 +17,12 @@ import dev.jokr.localnet.utils.SerializationUtil;
 /**
  * Created by JoKr on 8/28/2016.
  */
-public class DiscoverySocketHandler implements Runnable {
+class DiscoverySocketThread implements Runnable {
 
     private DiscoveryReply reply;
     private DatagramSocket socket;
 
-    public DiscoverySocketHandler( DiscoveryReply reply) {
+    public DiscoverySocketThread(DiscoveryReply reply) {
         this.reply = reply;
     }
 

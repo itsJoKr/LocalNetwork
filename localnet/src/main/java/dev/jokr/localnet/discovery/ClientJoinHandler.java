@@ -19,12 +19,12 @@ import dev.jokr.localnet.utils.SerializationUtil;
 /**
  * Created by JoKr on 8/27/2016.
  */
-public class JoinThread implements Runnable {
+public class ClientJoinHandler implements Runnable {
 
     private DatagramSocket socket;
     private ServerDiscoveryCallback callback;
 
-    public JoinThread(ServerDiscoveryCallback callback) {
+    public ClientJoinHandler(ServerDiscoveryCallback callback) {
         this.callback = callback;
     }
 
