@@ -1,4 +1,4 @@
-package dev.jokr.localnetworkapp;
+package dev.jokr.localnetworkapp.models;
 
 import java.io.Serializable;
 

@@ -15,7 +15,7 @@ import android.widget.Toast;
 import dev.jokr.localnet.LocalClient;
 import dev.jokr.localnet.LocalServer;
 import dev.jokr.localnet.models.Payload;
-import dev.jokr.localnetworkapp.MyMessage;
+import dev.jokr.localnetworkapp.models.MyMessage;
 import dev.jokr.localnetworkapp.R;
 
 /**

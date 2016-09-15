@@ -8,7 +8,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
-import dev.jokr.localnet.discovery.models.Peer;
 import dev.jokr.localnet.utils.NetworkUtil;
 import dev.jokr.localnet.utils.SerializationUtil;
 
@@ -53,7 +52,4 @@ public class DiscoveryThread implements Runnable {
 
     }
 
-    public interface PeerConnectedCallback {
-        public void onPeerConnected(Peer peer);
-    }
 }

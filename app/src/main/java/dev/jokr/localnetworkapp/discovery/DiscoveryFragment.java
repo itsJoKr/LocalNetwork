@@ -18,6 +18,7 @@ import dev.jokr.localnet.LocalServer;
 import dev.jokr.localnet.models.Payload;
 import dev.jokr.localnetworkapp.GameSession;
 import dev.jokr.localnetworkapp.R;
+import dev.jokr.localnetworkapp.models.MyProfile;
 import dev.jokr.localnetworkapp.session.MessagesAdapter;
 
 /**
@@ -90,7 +91,7 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
         isServer = false;
 
         LocalClient localClient = new LocalClient(getContext());
-        localClient.connect();
+        localClient.connect(new Payload<MyProfile>(new MyProfile("John", "Doe")));
         localClient.setDiscoveryReceiver(new LocalClient.DiscoveryStatusReceiver() {
             @Override
             public void onDiscoveryTimeout() {
@@ -138,7 +139,7 @@ public class DiscoveryFragment extends Fragment implements LocalServer.OnUiEvent
 
     @Override
     public void onClientConnected(Payload<?> payload) {
-        adapter.addMessage("" + payload);
+        adapter.addMessage("" + payload.getPayload());
     }
 
     public void setListener(FragmentInteractionListener listener) {

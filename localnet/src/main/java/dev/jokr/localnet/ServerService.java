@@ -57,6 +57,7 @@ public class ServerService extends Service implements ServerSocketThread.Service
         t.start();
 
 //        startForeground();
+        runServiceInForeground();
     }
 
     /*
@@ -113,8 +114,11 @@ public class ServerService extends Service implements ServerSocketThread.Service
 
 
     private void runServiceInForeground() {
+
+
         Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle("Local Net Session")
+                .setContentTitle("LocalNet Session")
+                .setContentText("Session is currently running")
                 .setSmallIcon(R.drawable.ic_play_circle_filled_black_24dp)
                 .build();
         startForeground(NOTIFICATION_ID, notification);

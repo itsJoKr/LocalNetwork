@@ -34,6 +34,7 @@ public class ClientJoinHandler implements Runnable {
             socket = new DatagramSocket(0);
             socket.setBroadcast(true);
 
+            // data is not important for braodcast discovery request
             byte[]  sendData = "DISCOVER_ME".getBytes();
             InetAddress broadcastAddr = InetAddress.getByName("255.255.255.255");
 
@@ -45,7 +46,7 @@ public class ClientJoinHandler implements Runnable {
             }
             byte[] buffer = new byte[15000];
             DatagramPacket receivePacket = new DatagramPacket(buffer, buffer.length);
-            socket.setSoTimeout(10000);
+            socket.setSoTimeout(2500);
             socket.receive(receivePacket);
             Log.d("USER", "Received packet from: " + receivePacket.getAddress().getHostAddress());
 

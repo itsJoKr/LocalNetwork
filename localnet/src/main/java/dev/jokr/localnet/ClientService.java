@@ -27,9 +27,11 @@ public class ClientService extends Service implements ClientSocketThread.Service
     public static final String PAYLOAD = "payload";
 
     // Possible service actions:
+    public static final int DISCOVERY_REQUEST = 1;
     public static final int SESSION_MESSAGE = 2;
     public static final int STOP = 3;
 
+    private Payload<?> registerPayload;
     private ClientSocketThread clientSocketThread;
     private SendHandler sendHandler;
 
@@ -68,8 +70,9 @@ public class ClientService extends Service implements ClientSocketThread.Service
     private void processAction(int action, Intent intent) {
         if (action == 0)
             return;
-
-        if (action == SESSION_MESSAGE)
+        if (action == DISCOVERY_REQUEST)
+            registerPayload = (Payload<?>) intent.getSerializableExtra(PAYLOAD);
+        else if (action == SESSION_MESSAGE)
             sendSessionMessage((Payload<?>) intent.getSerializableExtra(PAYLOAD));
         else if (action == STOP)
             this.stopSelf();
@@ -77,7 +80,7 @@ public class ClientService extends Service implements ClientSocketThread.Service
 
     @Override
     public void onInitializedSocket(int port) {
-        RegisterMessage message = new RegisterMessage(new Payload<Integer>(42), getLocalIp(), port);
+        RegisterMessage message = new RegisterMessage(registerPayload, getLocalIp(), port);
         Thread t = new Thread(new SendHandler(new IncomingServerMessage(MessageType.REGISTER, message), reply.getIp(), reply.getPort()));
         t.start();
     }

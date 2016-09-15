@@ -25,6 +25,8 @@ public class LocalClient implements ClientJoinHandler.ServerDiscoveryCallback {
     private MessageReceiver messageReceiver;
     private DiscoveryStatusReceiver discoveryReceiver;
 
+    private Payload<?> registerPayload;
+
 
     public LocalClient(Context context) {
         this.context = context;
@@ -42,7 +44,8 @@ public class LocalClient implements ClientJoinHandler.ServerDiscoveryCallback {
      * Attempt to discover server. If successful, onServerDiscovered will be called, otherwise
      * onDiscoveryTimeout will be called. You can call this method multiple times, if first attempt fails.
      */
-    public void connect() {
+    public void connect(Payload<?> payload) {
+        registerPayload = payload;
         ClientJoinHandler thread = new ClientJoinHandler(this);
         new Thread(thread).start();
     }
@@ -76,6 +79,8 @@ public class LocalClient implements ClientJoinHandler.ServerDiscoveryCallback {
         if (discoveryReceiver != null)
             discoveryReceiver.onServerDiscovered();
         Intent i = new Intent(context, ClientService.class);
+        i.putExtra(ClientService.ACTION, ClientService.DISCOVERY_REQUEST);
+        i.putExtra(ClientService.PAYLOAD, registerPayload);
         i.putExtra(ClientService.DISCOVERY_REPLY, reply);
         context.startService(i);
     }
@@ -113,7 +118,7 @@ public class LocalClient implements ClientJoinHandler.ServerDiscoveryCallback {
     }
 
     /*
-     * Interface for receiving event from discovery phase.
+     * Interface for receiving events from discovery phase.
      */
     public interface DiscoveryStatusReceiver {
         public void onDiscoveryTimeout();
