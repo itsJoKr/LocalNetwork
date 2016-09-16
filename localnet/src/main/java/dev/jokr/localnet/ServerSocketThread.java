@@ -20,7 +20,9 @@ import dev.jokr.localnet.utils.MessageType;
  * Created by JoKr on 8/28/2016.
  */
 class ServerSocketThread implements Runnable {
+
     private ServiceCallback callback;
+    private Socket socket;
 
     public ServerSocketThread(ServiceCallback callback) {
         this.callback = callback;
@@ -34,7 +36,7 @@ class ServerSocketThread implements Runnable {
             notifySocketInitialized(serverSocket.getLocalPort());
 
             while (true) {
-                Socket socket = serverSocket.accept();
+                socket = serverSocket.accept();
                 Log.d("USER", "ServerSocket :: got incomingMessage");
                 ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                 IncomingServerMessage message = (IncomingServerMessage) input.readObject();
@@ -53,6 +55,7 @@ class ServerSocketThread implements Runnable {
             e.printStackTrace();
         }
     }
+
 
     private void notifySocketInitialized(final int port) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {

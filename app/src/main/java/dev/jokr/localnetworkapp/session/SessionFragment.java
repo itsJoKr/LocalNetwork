@@ -63,6 +63,13 @@ public class SessionFragment extends Fragment {
             }
         });
 
+        Button btnStop = (Button) view.findViewById(R.id.btn_stop_session);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopSession();
+            }
+        });
 
         if (role == SERVER)
             setupServer();
@@ -108,4 +115,10 @@ public class SessionFragment extends Fragment {
     }
 
 
+    private void stopSession() {
+        if (role == SERVER)
+            server.shutdown();
+        else if (role == CLIENT)
+            client.shutdown();
+    }
 }

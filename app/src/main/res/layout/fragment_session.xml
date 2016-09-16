@@ -9,6 +9,12 @@
         android:text="SEND MESSAGE"
         android:id="@+id/btn_send_message"/>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STOP"
+        android:id="@+id/btn_stop_session"/>
+
     <android.support.v7.widget.RecyclerView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -64,8 +64,9 @@ public class LocalServer {
      */
     public void shutdown() {
         Intent i = new Intent(context, ServerService.class);
-        i.putExtra(ServerService.ACTION, ServerService.STOP);
-        context.startService(i);
+        context.stopService(i);
+//        i.putExtra(ServerService.ACTION, ServerService.STOP);
+//        context.startService(i);
     }
 
     /*

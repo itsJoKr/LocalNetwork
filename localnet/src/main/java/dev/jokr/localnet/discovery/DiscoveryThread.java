@@ -19,7 +19,6 @@ public class DiscoveryThread implements Runnable {
     private DatagramSocket socket;
     private DiscoveryReply reply;
 
-
     public DiscoveryThread(DiscoveryReply reply) {
         this.reply = reply;
     }
@@ -49,7 +48,6 @@ public class DiscoveryThread implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
 }

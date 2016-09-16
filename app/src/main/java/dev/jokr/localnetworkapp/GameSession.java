@@ -21,7 +21,7 @@ public class GameSession extends LocalSession {
     @Override
     public void onCreate(Bundle bundle, ConnectedClients connectedClients){
         Log.d("USER", "SESSION: onCreate");
-        long id = (long) connectedClients.getAllClientsIds().toArray()[0];
+//        long id = (long) connectedClients.getAllClientsIds().toArray()[0];
 //        sendMessage(id, new Payload<MyMessage>(new ));
     }
 

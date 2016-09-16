@@ -37,14 +37,13 @@ public class ServerService extends Service implements ServerSocketThread.Service
     // Possible service actions:
     public static final int START_SESSION = 1;
     public static final int SESSION_EVENT = 2;
-    public static final int STOP = 3;
 
-    private ServerSocketThread serverSocketThread;
-    private DiscoverySocketThread discoverySocketThread;
 
     private HashMap<Long, RegisterMessage> registeredClients;
     private LocalSession session;
     private LocalBroadcastManager manager;
+    private Thread serverSocketThread;
+    private Thread discoverySocketThread;
 
     @Override
     public void onCreate() {
@@ -53,10 +52,9 @@ public class ServerService extends Service implements ServerSocketThread.Service
         this.manager = LocalBroadcastManager.getInstance(this);
         registeredClients = new HashMap<>();
 
-        Thread t = new Thread(new ServerSocketThread(this));
-        t.start();
+        serverSocketThread = new Thread(new ServerSocketThread(this));
+        serverSocketThread.start();
 
-//        startForeground();
         runServiceInForeground();
     }
 
@@ -72,7 +70,7 @@ public class ServerService extends Service implements ServerSocketThread.Service
         processAction(action, intent);
 
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     private void processAction(int action, Intent intent) {
@@ -83,8 +81,6 @@ public class ServerService extends Service implements ServerSocketThread.Service
             startSession((Class) intent.getSerializableExtra(CLASS), intent.getBundleExtra(BUNDLE));
         else if (action == SESSION_EVENT)
             session.onEvent((Payload<?>) intent.getSerializableExtra(PAYLOAD));
-        else if (action == STOP)
-            this.stopSelf();
     }
 
     private void startSession(Class c, Bundle b) {
@@ -114,8 +110,6 @@ public class ServerService extends Service implements ServerSocketThread.Service
 
 
     private void runServiceInForeground() {
-
-
         Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle("LocalNet Session")
                 .setContentText("Session is currently running")
@@ -132,8 +126,8 @@ public class ServerService extends Service implements ServerSocketThread.Service
 
     @Override
     public void onInitializedSocket(int port) {
-        Thread t = new Thread(new DiscoverySocketThread(new DiscoveryReply(getLocalIp(), port)));
-        t.start();
+        discoverySocketThread = new Thread(new DiscoverySocketThread(new DiscoveryReply(getLocalIp(), port)));
+        discoverySocketThread.start();
     }
 
     @Override
@@ -189,4 +183,5 @@ public class ServerService extends Service implements ServerSocketThread.Service
         i.putExtra(SessionMessage.class.getName(), sessionMessage);
         manager.sendBroadcast(i);
     }
+
 }

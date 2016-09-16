@@ -1,11 +1,13 @@
 package dev.jokr.localnet;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.NotificationCompat;
 import android.text.format.Formatter;
 
 import dev.jokr.localnet.discovery.models.DiscoveryReply;
@@ -22,6 +24,7 @@ public class ClientService extends Service implements ClientSocketThread.Service
 
     public static final String ACTION = "action";
     public static final String DISCOVERY_REPLY = "reply";
+    public static final int NOTIFICATION_ID = 521;
 
     // Keys for extras
     public static final String PAYLOAD = "payload";
@@ -29,7 +32,6 @@ public class ClientService extends Service implements ClientSocketThread.Service
     // Possible service actions:
     public static final int DISCOVERY_REQUEST = 1;
     public static final int SESSION_MESSAGE = 2;
-    public static final int STOP = 3;
 
     private Payload<?> registerPayload;
     private ClientSocketThread clientSocketThread;
@@ -45,6 +47,8 @@ public class ClientService extends Service implements ClientSocketThread.Service
         this.manager = LocalBroadcastManager.getInstance(this);
         Thread t = new Thread(new ClientSocketThread(this));
         t.start();
+
+        runServiceInForeground();
     }
 
     @Nullable
@@ -74,8 +78,6 @@ public class ClientService extends Service implements ClientSocketThread.Service
             registerPayload = (Payload<?>) intent.getSerializableExtra(PAYLOAD);
         else if (action == SESSION_MESSAGE)
             sendSessionMessage((Payload<?>) intent.getSerializableExtra(PAYLOAD));
-        else if (action == STOP)
-            this.stopSelf();
     }
 
     @Override
@@ -90,6 +92,15 @@ public class ClientService extends Service implements ClientSocketThread.Service
         Intent i = new Intent(LocalClient.SESSION_MESSAGE);
         i.putExtra(SessionMessage.class.getName(), message);
         manager.sendBroadcast(i);
+    }
+
+    private void runServiceInForeground() {
+        Notification notification = new NotificationCompat.Builder(this)
+                .setContentTitle("LocalNet Session")
+                .setContentText("Session is currently running")
+                .setSmallIcon(R.drawable.ic_play_circle_filled_black_24dp)
+                .build();
+        startForeground(NOTIFICATION_ID, notification);
     }
 
     private void sendSessionMessage(Payload<?> payload){

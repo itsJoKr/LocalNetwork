@@ -74,6 +74,14 @@ public class LocalClient implements ClientJoinHandler.ServerDiscoveryCallback {
         this.discoveryReceiver = discoveryReceiver;
     }
 
+    /*
+     * Stops the service
+     */
+    public void shutdown() {
+        Intent i = new Intent(context, ClientService.class);
+        context.stopService(i);
+    }
+
     @Override
     public void serverDiscovered(DiscoveryReply reply) {
         if (discoveryReceiver != null)
