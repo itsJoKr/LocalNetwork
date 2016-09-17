@@ -2,7 +2,10 @@
 Local network library for connecting Android devices on WiFi. One device serves as a server, others are clients. Library takes care of
 discovery of server by clients. Library uses services and separate threads with sockets to handle communication.
 
-This library is nowhere near done.
+This library is nowhere near done. But you can get it from jcenter if you want: 
+```groovy
+compile 'com.github.jokr:localnet:0.1'
+```
 
 ## Usage
 There are two main parts of this library: server and client. One device should be server and others should be clients.
