@@ -2,6 +2,9 @@
 Local network library for connecting Android devices on WiFi. One device serves as a server, others are clients. Library takes care of
 discovery of server by clients. Library uses services and separate threads with sockets to handle communication.
 
+### Wi-Fi Aware
+In new O Developer Preview, Android team created something called Wi-Fi aware, and you might want to check that out: https://developer.android.com/preview/features/wifi-aware.html 
+
 This library is nowhere near done. But you can get it from jcenter if you want: 
 ```groovy
 compile 'com.github.jokr:localnet:0.1'
