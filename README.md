@@ -1,4 +1,6 @@
 # LocalNetwork
+DISCLAIMER: I've found out that discovery using broadcast UDP is not guaranteed. It will work with most routers, but some might not allow it by default. Same with devices - works on most devices, but then you need fixes for specific devices.
+
 Local network library for connecting Android devices on WiFi. One device serves as a server, others are clients. Library takes care of
 discovery of server by clients. Library uses services and separate threads with sockets to handle communication.
 
