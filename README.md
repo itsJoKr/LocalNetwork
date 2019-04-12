@@ -9,7 +9,7 @@ In new O Developer Preview, Android team created something called Wi-Fi aware, a
 
 This library is nowhere near done. But you can get it from jcenter if you want: 
 ```groovy
-compile 'com.github.jokr:localnet:0.1'
+implementation 'com.github.jokr:localnet:0.1'
 ```
 
 ## Usage
