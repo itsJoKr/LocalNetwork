@@ -1,8 +1,7 @@
 # LocalNetwork
-DISCLAIMER: I've found out that discovery using broadcast UDP is not guaranteed. It will work with most routers, but some might not allow it by default. Same with devices - works on most devices, but then you need fixes for specific devices.
+DEPRECATED: This library is using the UDP broadcasts to discover other devices in the same network. It then groups them and continues to use TCP sockets for communication. This worked for my case but I've found out that UDP broadcast is not guaranteed to work. It will work with most routers, but some might not allow it by default. Same with devices - works on most devices, but then you need fixes for specific devices and doesn't work with some devices at all.
 
-Local network library for connecting Android devices on WiFi. One device serves as a server, others are clients. Library takes care of
-discovery of server by clients. Library uses services and separate threads with sockets to handle communication.
+Local network library for connecting Android devices on WiFi. One device serves as a server, others are clients. Library takes care of discovery of server by clients. Library uses services and separate threads with sockets to handle communication.
 
 ### Wi-Fi Aware
 In new O Developer Preview, Android team created something called Wi-Fi aware, and you might want to check that out: https://developer.android.com/preview/features/wifi-aware.html 
